@@ -12,7 +12,54 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
   // 0 = Alimentacion, 1 = Transporte, 2 = Servicios, 3 = Otros
   int categoriaSeleccionada = 0;
 
+  // 1. Nuestra memoria: Guardamos la cantidad que el usuario está ingresando
+  String montoIngresado = '0';
+
+  // 2. Logica: Función para agegar números
+
+  void agregarNumero(String numero) {
+    setState(() {
+      if (montoIngresado == '0' && numero != '.') {
+        montoIngresado = numero; // Reemplaza el 0 inicial con el primer número ingresado
+      } else if (montoIngresado.contains('.') && numero == '.') {
+        return; // Evita agregar un segundo punto decimal (ej. 14.5.2)
+      } else {
+        montoIngresado += numero;
+      }
+    });
+  }
+
+  // 3. Logica: Función para borrar el último número
+  void borrarUltimo() {
+    setState(() {
+      if (montoIngresado.length > 1) {
+        montoIngresado = montoIngresado.substring(0, montoIngresado.length - 1);
+      } else {
+        montoIngresado = '0'; // Si solo queda un dígito, lo reemplaza con 0
+      }
+    });
+  }
+
+  Widget _buildBotonTeclado(String texto) {
+    return Expanded(
+      child: TextButton(
+          onPressed: () {
+            if (texto == '⌫') {
+              borrarUltimo();
+            } else {
+              agregarNumero(texto);
+            }
+          },          
+          child: Text(
+            texto,
+            style: const TextStyle(fontSize: 28, color: Colors.black87),
+          ),
+        ),
+      );    
+    }
+   
   @override
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
@@ -27,13 +74,13 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
 
             // Cantidad grande
 
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '\$ 0.00',
-                  style: TextStyle(fontSize: 70, fontWeight: FontWeight.bold, height: 1),
+                  '\$ $montoIngresado',
+                  style: const TextStyle(fontSize: 70, fontWeight: FontWeight.bold, height: 1),
                 ),
                 SizedBox(width: 8),
                 Padding(
@@ -62,7 +109,6 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
             ),
 
             const SizedBox(height: 40),
-
             // Contenedor del teclado numérico gris
             Expanded(
               child: Container(
@@ -71,6 +117,17 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Row(children: [_buildBotonTeclado('1'), _buildBotonTeclado('2'), _buildBotonTeclado('3')]),
+                          Row(children: [_buildBotonTeclado('4'), _buildBotonTeclado('5'), _buildBotonTeclado('6')]),
+                          Row(children: [_buildBotonTeclado('7'), _buildBotonTeclado('8'), _buildBotonTeclado('9')]),
+                          Row(children: [_buildBotonTeclado('.'), _buildBotonTeclado('0'), _buildBotonTeclado('⌫')]),
+                        ],                        
+                      ),
+                    ),
                     // Botones con UX
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -128,5 +185,4 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
       ),
     );
   }
-
 }

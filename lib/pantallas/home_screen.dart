@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'teclado_pantalla.dart';
 //import 'add_expense_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -67,8 +68,7 @@ class HomeScreen extends StatelessWidget {
         height: 56,
         child: FloatingActionButton.extended(
           onPressed: () {
-            // Navegación a la Pantalla 2
-            //Navigator.push(context, MaterialPageRoute(builder: (context) => const AddExpenseScreen()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const TecladoPantalla(),));
           },
           backgroundColor: salmonColor,
           elevation: 4,
