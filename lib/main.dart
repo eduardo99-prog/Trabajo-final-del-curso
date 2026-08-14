@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'pantallas/home_screen.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'modelos/gastos.dart';
 
-void main() {
+// NUEVO main asíncrono
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(GastoAdapter());
+  await Hive.openBox<Gasto>('caja_gastos');
+
   runApp(const GastosApp());
 }
-
 class GastosApp extends StatelessWidget {
   const GastosApp({super.key});
 

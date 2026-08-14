@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:gastos_app/modelos/gastos.dart';
+
 
 class TecladoPantalla extends StatefulWidget {
   const TecladoPantalla({super.key});
@@ -14,6 +17,16 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
 
   // 1. Nuestra memoria: Guardamos la cantidad que el usuario está ingresando
   String montoIngresado = '0';
+
+  // Variables nuevas para el formulario
+  final conceptoController = TextEditingController();
+  String categoriaSeleccionadaTexto = 'Otros'; // Valor por defecto
+
+  @override
+  void dispose() {
+    conceptoController.dispose();
+    super.dispose();
+  }
 
   // 2. Logica: Función para agegar números
 
@@ -95,16 +108,39 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
             const SizedBox(height: 40),
 
             // Categorías horizontales
+            // INICIO nuevo firmulario HIVE
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  //_buildCategoriaItem(Icons.restaurant, 'Alimentación', 0),
-                  //_buildCategoriaItem(Icons.local_taxi, 'Transporte', 1),
-                  //_buildCategoriaItem(Icons.local_laundry_service, 'Servicios', 2),
-                  //_buildCategoriaItem(Icons.other_houses, 'Otros', 3),
+              child: TextField(
+                controller: conceptoController,
+                decoration: const InputDecoration(
+                  labelText: 'Concepto',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: DropdownButtonFormField(
+                value: categoriaSeleccionadaTexto,
+                decoration: const InputDecoration(
+                  labelText: 'Categoría',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'Alimentación', child: Text('Alimentación')),
+                  DropdownMenuItem(value: 'Transporte', child: Text('Transporte')),
+                  DropdownMenuItem(value: 'Servicios', child: Text('Servicios')),
+                  DropdownMenuItem(value: 'Otros', child: Text('Otros')),
                 ],
+                onChanged: (valor) {
+                  if (valor != null) {
+                    setState(() {
+                      categoriaSeleccionadaTexto = valor;
+                    });
+                  }            
+                },                
               ),
             ),
 
@@ -138,7 +174,28 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
                             width: double.infinity,
                             height: 56,
                             child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: () async {
+                                final monto = double.tryParse(montoIngresado);
+                                if (monto == null || monto <= 0) return;
+
+                                final concepto = conceptoController.text.trim().isEmpty
+                                    ? 'Gasto'
+                                    : conceptoController.text.trim();
+
+                                final caja = Hive.box('caja_gastos');
+                                final gasto = Gasto(
+                                  concepto: concepto,
+                                  monto: monto,
+                                  categoria: categoriaSeleccionadaTexto,
+                                  fecha: DateTime.now(),
+                                );
+
+                                await caja.add(gasto); // Guarda en disco
+
+                                if (!context.mounted) return;
+                                Navigator.pop(context); // Cierra la pantalla
+
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Theme.of(context).primaryColor,
                                 shape: RoundedRectangleBorder(
