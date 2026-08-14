@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:gastos_app/modelos/gastos.dart';
 
-
 class TecladoPantalla extends StatefulWidget {
   const TecladoPantalla({super.key});
 
