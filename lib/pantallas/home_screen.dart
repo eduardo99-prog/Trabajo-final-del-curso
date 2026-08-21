@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'teclado_pantalla.dart';
-//import 'add_expense_screen.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:gastos_app/modelos/gastos.dart.';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -8,13 +9,29 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final salmonColor = Theme.of(context).primaryColor;
+    final caja = Hive.box<Gasto>('caja_gastos');
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ValueListenableBuilder(
+            valueListenable: caja.listenable(),
+            builder: (context, Box<Gasto> caja, _) {
+              // Filtrar los gastos de hoy
+              final hoy = DateTime.now();
+              final gastosDeHoy = caja.values
+                .where((g) =>
+                  g.fecha.year == hoy.year &&
+                  g.fecha.month == hoy.month &&
+                  g.fecha.day == hoy.day)
+                .toList();
+              // Calcular el total de gastos de hoy
+              final totalHoy = gastosDeHoy.fold<double>(0.0, (sum, g) => sum + g.monto);
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,           
+
             children: [
               // 1. Tarjeta de Total Gastos
               Container(
@@ -33,10 +50,10 @@ class HomeScreen extends StatelessWidget {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text('Total gastos hoy', style: TextStyle(fontSize: 14, color: Colors.black54)),
                     SizedBox(height: 8),
-                    Text('\$ 14.50', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+                    Text('\$ ${totalHoy.toStringAsFixed(2)}', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -48,15 +65,25 @@ class HomeScreen extends StatelessWidget {
               
               // 3. Lista de Gastos (Reutilizando el Custom Widget)
               Expanded(
-                child: ListView(
-                  children: const [
-                    _GastoCard(icono: '☕', nombre: 'Starbucks', categoria: 'Comidas & Bebidas', precio: '\$6.50', hora: '9:15 AM'),
-                    _GastoCard(icono: '🚕', nombre: 'Uber', categoria: 'Transporte', precio: '\$2.75', hora: '11:30 AM'),
-                    _GastoCard(icono: '🍽️', nombre: 'Almuerzo', categoria: 'Comidas & Bebidas', precio: '\$5.25', hora: '1:30 PM'),
-                  ],
-                ),
+                child: gastosDeHoy.isEmpty
+                    ? const Center(child: Text('No hay gastos registrados hoy.', style: TextStyle(color: Colors.black54)))
+                    : ListView.builder(
+                        itemCount: gastosDeHoy.length,
+                        itemBuilder: (context, i) {
+                          final g = gastosDeHoy[i];
+                          return _GastoCard(
+                            icono: _iconoCategoria(g.categoria),
+                            nombre: g.concepto,
+                            categoria: g.categoria,
+                            precio: '\$ ${g.monto.toStringAsFixed(2)}',
+                            hora: _formatearHora(g.fecha),
+                          );
+                        },
+                      ),
               )
             ],
+              );
+            },
           ),
         ),
       ),
@@ -78,6 +105,27 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+String _iconoCategoria(String categoria) {
+  switch (categoria) {
+    case 'Comida':
+      return '🍔';
+    case 'Transporte':
+      return '🚌';
+    case 'Entretenimiento':
+      return '🎮';
+    case 'Salud':
+      return '💊';
+    default:
+      return '💰';
+  }
+}
+
+String _formatearHora(DateTime fecha) {
+  final hora = fecha.hour.toString().padLeft(2, '0');
+  final minuto = fecha.minute.toString().padLeft(2, '0');
+  return '$hora:$minuto';
 }
 
 // Custom Widget para no repetir el código de la tarjeta blanca
