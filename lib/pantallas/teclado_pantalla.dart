@@ -10,16 +10,9 @@ class TecladoPantalla extends StatefulWidget {
 }
 
 class _TecladoPantallaState extends State<TecladoPantalla> {
-  // Estado: Esta variable guarda que categoría está activa
-  // 0 = Alimentacion, 1 = Transporte, 2 = Servicios, 3 = Otros
-  int categoriaSeleccionada = 0;
-
-  // 1. Nuestra memoria: Guardamos la cantidad que el usuario está ingresando
   String montoIngresado = '0';
-
-  // Variables nuevas para el formulario
   final conceptoController = TextEditingController();
-  String categoriaSeleccionadaTexto = 'Otros'; // Valor por defecto
+  String categoriaSeleccionadaTexto = 'Otros';
 
   @override
   void dispose() {
@@ -27,27 +20,24 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
     super.dispose();
   }
 
-  // 2. Logica: Función para agegar números
-
   void agregarNumero(String numero) {
     setState(() {
       if (montoIngresado == '0' && numero != '.') {
-        montoIngresado = numero; // Reemplaza el 0 inicial con el primer número ingresado
+        montoIngresado = numero;
       } else if (montoIngresado.contains('.') && numero == '.') {
-        return; // Evita agregar un segundo punto decimal (ej. 14.5.2)
+        return;
       } else {
         montoIngresado += numero;
       }
     });
   }
 
-  // 3. Logica: Función para borrar el último número
   void borrarUltimo() {
     setState(() {
       if (montoIngresado.length > 1) {
         montoIngresado = montoIngresado.substring(0, montoIngresado.length - 1);
       } else {
-        montoIngresado = '0'; // Si solo queda un dígito, lo reemplaza con 0
+        montoIngresado = '0';
       }
     });
   }
@@ -55,23 +45,22 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
   Widget _buildBotonTeclado(String texto) {
     return Expanded(
       child: TextButton(
-          onPressed: () {
-            if (texto == '⌫') {
-              borrarUltimo();
-            } else {
-              agregarNumero(texto);
-            }
-          },          
-          child: Text(
-            texto,
-            style: const TextStyle(fontSize: 28, color: Colors.black87),
-          ),
+        onPressed: () {
+          if (texto == '⌫') {
+            borrarUltimo();
+          } else {
+            agregarNumero(texto);
+          }
+        },
+        child: Text(
+          texto,
+          style: const TextStyle(fontSize: 28, color: Colors.black87),
         ),
-      );    
-    }
-   
-  @override
+      ),
+    );
+  }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
@@ -83,9 +72,6 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 32),
-
-            // Cantidad grande
-
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -94,9 +80,9 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
                   '\$ $montoIngresado',
                   style: const TextStyle(fontSize: 70, fontWeight: FontWeight.bold, height: 1),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Padding(
-                  padding: EdgeInsets.only(bottom: 8.0),
+                  padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text(
                     'USD',
                     style: TextStyle(fontSize: 20, color: Colors.black54),
@@ -105,27 +91,45 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
               ],
             ),
             const SizedBox(height: 40),
-
-            // Categorías horizontales
-            // INICIO nuevo firmulario HIVE
+            // ========== CAMPO CONCEPTO (sin amarillo) ==========
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: TextField(
                 controller: conceptoController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Concepto',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.grey, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey, width: 1),
+                  ),
+                  // Etiqueta flotante en rojo
+                  floatingLabelStyle: TextStyle(color: Theme.of(context).primaryColor),
                 ),
               ),
             ),
             const SizedBox(height: 16),
+            // ========== CAMPO CATEGORÍA (sin amarillo) ==========
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: DropdownButtonFormField(
+              child: DropdownButtonFormField<String>(
                 value: categoriaSeleccionadaTexto,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Categoría',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.grey, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey, width: 1),
+                  ),
+                  floatingLabelStyle: TextStyle(color: Theme.of(context).primaryColor),
                 ),
                 items: const [
                   DropdownMenuItem(value: 'Alimentación', child: Text('Alimentación')),
@@ -138,13 +142,12 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
                     setState(() {
                       categoriaSeleccionadaTexto = valor;
                     });
-                  }            
-                },                
+                  }
+                },
               ),
             ),
-
             const SizedBox(height: 40),
-            // Contenedor del teclado numérico gris
+            // ========== TECLADO NUMÉRICO ==========
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -160,15 +163,13 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
                           Row(children: [_buildBotonTeclado('4'), _buildBotonTeclado('5'), _buildBotonTeclado('6')]),
                           Row(children: [_buildBotonTeclado('7'), _buildBotonTeclado('8'), _buildBotonTeclado('9')]),
                           Row(children: [_buildBotonTeclado('.'), _buildBotonTeclado('0'), _buildBotonTeclado('⌫')]),
-                        ],                        
+                        ],
                       ),
                     ),
-                    // Botones con UX
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
                         children: [
-                          // 1 Accion Principal
                           SizedBox(
                             width: double.infinity,
                             height: 56,
@@ -181,7 +182,7 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
                                     ? 'Gasto'
                                     : conceptoController.text.trim();
 
-                                final caja = Hive.box('caja_gastos');
+                                final caja = Hive.box<Gasto>('caja_gastos');
                                 final gasto = Gasto(
                                   concepto: concepto,
                                   monto: monto,
@@ -189,11 +190,10 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
                                   fecha: DateTime.now(),
                                 );
 
-                                await caja.add(gasto); // Guarda en disco
+                                await caja.add(gasto);
 
                                 if (!context.mounted) return;
-                                Navigator.pop(context); // Cierra la pantalla
-
+                                Navigator.pop(context);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Theme.of(context).primaryColor,
@@ -203,13 +203,12 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
                                 elevation: 0,
                               ),
                               child: const Text(
-                                '+ Agregar gasto', 
+                                '+ Agregar gasto',
                                 style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.w500),
-                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 16),
-                          // 2 Accion Secundaria
                           SizedBox(
                             width: double.infinity,
                             height: 56,
@@ -221,16 +220,16 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
                                 side: BorderSide(color: Theme.of(context).primaryColor, width: 1),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(28),
-                                ),                                
+                                ),
                               ),
                               child: const Text(
-                                'Cancelar', 
+                                'Cancelar',
                                 style: TextStyle(fontSize: 18, color: Colors.black54),
-                                ),
+                              ),
                             ),
                           ),
                         ],
-                      )
+                      ),
                     )
                   ],
                 ),
