@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:gastos_app/modelos/gastos.dart';
+import '../modelos/gastos.dart';
 
 class TecladoPantalla extends StatefulWidget {
   const TecladoPantalla({super.key});
@@ -181,7 +181,7 @@ class _TecladoPantallaState extends State<TecladoPantalla> {
                                     ? 'Gasto'
                                     : conceptoController.text.trim();
 
-                                final caja = Hive.box('caja_gastos');
+                                final caja = Hive.box<Gasto>('caja_gastos');
                                 final gasto = Gasto(
                                   concepto: concepto,
                                   monto: monto,
