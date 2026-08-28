@@ -20,14 +20,14 @@ class HomeScreen extends StatelessWidget {
             builder: (context, Box<Gasto> caja, _) {
               // Filtrar los gastos de hoy
               final hoy = DateTime.now();
-              final gastosDeHoy = caja.values
-                .where((g) =>
-                  g.fecha.year == hoy.year &&
-                  g.fecha.month == hoy.month &&
-                  g.fecha.day == hoy.day)
+              final gastosDeHoy = caja.toMap().entries
+                .where((e) =>
+                  e.value.fecha.year == hoy.year &&
+                  e.value.fecha.month == hoy.month &&
+                  e.value.fecha.day == hoy.day)
                 .toList();
               // Calcular el total de gastos de hoy
-              final totalHoy = gastosDeHoy.fold<double>(0.0, (sum, g) => sum + g.monto);
+              final totalHoy = gastosDeHoy.fold<double>(0.0, (sum, e) => sum + e.value.monto);
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,           
@@ -70,16 +70,52 @@ class HomeScreen extends StatelessWidget {
                     : ListView.builder(
                         itemCount: gastosDeHoy.length,
                         itemBuilder: (context, i) {
-                          final g = gastosDeHoy[i];
-                          return _GastoCard(
+                          final e = gastosDeHoy[i];
+                          final g = e.value;
+
+                          return Dismissible(
+                            key: ValueKey(e.key),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
+                              color: Colors.red,
+                              child: const Icon(Icons.delete, color: Colors.white),
+                            ),
+
+                            confirmDismiss: (direction) async {
+                              return await showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Confirmar eliminación'),
+                                  content: const Text('¿Estás seguro de que deseas eliminar este gasto?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(false),
+                                      child: const Text('Cancelar'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(true),
+                                      child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          
+                          onDismissed: (_) {
+                            caja.delete(e.key);
+                          },
+                          child: _GastoCard(
                             icono: _iconoCategoria(g.categoria),
                             nombre: g.concepto,
                             categoria: g.categoria,
                             precio: '\$ ${g.monto.toStringAsFixed(2)}',
                             hora: _formatearHora(g.fecha),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
+                    ),
               )
             ],
               );
