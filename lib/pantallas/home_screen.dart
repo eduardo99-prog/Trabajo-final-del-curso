@@ -68,6 +68,7 @@ class HomeScreen extends StatelessWidget {
                 child: gastosDeHoy.isEmpty
                     ? const Center(child: Text('No hay gastos registrados hoy.', style: TextStyle(color: Colors.black54)))
                     : ListView.builder(
+                        padding: const EdgeInsets.only(bottom: 88),
                         itemCount: gastosDeHoy.length,
                         itemBuilder: (context, i) {
                           final e = gastosDeHoy[i];
@@ -107,6 +108,7 @@ class HomeScreen extends StatelessWidget {
                             caja.delete(e.key);
                           },
                           child: _GastoCard(
+
                             icono: _iconoCategoria(g.categoria),
                             nombre: g.concepto,
                             categoria: g.categoria,
@@ -143,18 +145,18 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-String _iconoCategoria(String categoria) {
+IconData _iconoCategoria(String categoria) {
   switch (categoria) {
-    case 'Comida':
-      return '🍔';
+    case 'Alimentación':
+      return Icons.restaurant;
     case 'Transporte':
-      return '🚌';
-    case 'Entretenimiento':
-      return '🎮';
-    case 'Salud':
-      return '💊';
+      return Icons.directions_car;
+    case 'Servicios':
+      return Icons.lightbulb;
+    case 'Otros':
+      return Icons.category;
     default:
-      return '💰';
+      return Icons.attach_money;
   }
 }
 
@@ -166,7 +168,8 @@ String _formatearHora(DateTime fecha) {
 
 // Custom Widget para no repetir el código de la tarjeta blanca
 class _GastoCard extends StatelessWidget {
-  final String icono, nombre, categoria, precio, hora;
+  final IconData icono;
+  final String nombre, categoria, precio, hora;
 
   const _GastoCard({required this.icono, required this.nombre, required this.categoria, required this.precio, required this.hora});
 
@@ -185,7 +188,12 @@ class _GastoCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12)),
-            child: Text(icono, style: const TextStyle(fontSize: 24)),
+            child: Icon(
+              icono,
+              size: 24,
+              color: const Color.fromARGB(221, 91, 11, 11),
+
+            ),
           ),
           const SizedBox(width: 16),
           // Textos centrales
