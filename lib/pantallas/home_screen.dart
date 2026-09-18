@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'teclado_pantalla.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../modelos/gastos.dart';
+import '../servicios/gastos_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

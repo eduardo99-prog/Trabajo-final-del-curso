@@ -1,17 +1,29 @@
 import 'package:hive/hive.dart';
 
 class Gasto {
+  final String? id;
   final String concepto;
   final double monto;
   final String categoria;
   final DateTime fecha;
 
   Gasto({
+    this.id,
     required this.concepto,
     required this.monto,
     required this.categoria,
     required this.fecha,
   });
+
+  factory Gasto.fromMap(Map<String, dynamic> map) {
+    return Gasto(
+      id: map['id'] as String?,
+      concepto: map['concepto'] as String? ?? 'Sin concepto',
+      monto: (map['monto'] as num?)?.toDouble() ?? 0.0,
+      categoria: map['categoria'] as String? ?? 'Otros',
+      fecha: DateTime.parse(map['fecha'] as String).toLocal(),
+    );
+  }
 }
 
   class GastoAdapter extends TypeAdapter<Gasto> {
